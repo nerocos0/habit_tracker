@@ -1,0 +1,60 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Habit Tracker{% endblock %}</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'main/css/styles.css' %}">
+</head>
+<body>
+
+<header class="header">
+    <div class="header-content">
+        <div class="logo-container">
+            {% if user.is_authenticated %}
+                <a href="{% url 'main:habit_list' %}">
+                    <img src="{% static 'main/images/logo.png' %}" alt="Logo" class="logo">
+                </a>
+            {% else %}
+                <img src="{% static 'main/images/logo.png' %}" alt="Logo" class="logo logo-static">
+            {% endif %}
+        </div>
+
+        <div class="header-actions">
+            {% if user.is_authenticated %}
+                <a href="{% url 'main:habit_create' %}" class="header-btn primary">Добавить привычку</a>
+                <form method="post" action="{% url 'main:logout' %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-btn">Выйти</button>
+                </form>
+            {% else %}
+                <a href="{% url 'main:login' %}" class="auth-btn">Войти</a>
+                <a href="{% url 'main:register' %}" class="auth-btn">Регистрация</a>
+            {% endif %}
+        </div>
+    </div>
+</header>
+
+<main class="container">
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+</main>
+
+<footer>
+    <p>© 2026 Habit Tracker. Все права защищены.</p>
+</footer>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

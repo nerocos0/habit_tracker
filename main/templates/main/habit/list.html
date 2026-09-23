@@ -1,0 +1,21 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Список привычек{% endblock %}
+
+{% block content %}
+    {% for habit in habits %}
+        {{habit}}
+        {% if habit.is_done %}
+            <span>✅</span>
+        {% else %}
+            <span>❌</span>
+            <p>Выполнено {{ habit.count_done }} из {{ habit.target }}</p>
+        {% endif %}
+        <a href="{% url 'main:habit_detail' habit_slug=habit.slug %}">Детально</a>
+        {% if habit.is_active %}
+            <span>Активна</span>
+        {% else %}
+            <span>Неактивна</span>
+        {% endif %}
+    {% endfor %}
+{% endblock %}

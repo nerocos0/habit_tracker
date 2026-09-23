@@ -1,0 +1,42 @@
+{% extends 'main/base.html' %}
+{% block title %}{{ habit }}{% endblock %}
+
+{% block content %}
+
+    <h1>{{ habit }}</h1>
+    <p>{{ habit.description }}</p>
+
+    {% if not is_done %}
+        <p>План на сегодня не выполнен</p>
+        <form method="post" action="{% url 'main:habit_log_create' habit_slug=habit.slug %}">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Отметить</button>
+        </form>
+    {% else %}
+        <p>План на сегодня выполнен</p>
+    {% endif %}
+    <ul>
+        {% for log in today_logs %}
+            <li>✅ Выполнено в {{ log.datetime|time:'H:i' }}</li>
+            <form method="post" action="{% url 'main:habit_log_delete' habit_slug=habit.slug log_id=log.id %}">
+                {% csrf_token %}
+                <button type="submit">Удалить</button>
+            </form>
+        {% endfor %}
+    </ul>
+    <form method="post" action="{% url 'main:habit_reverse' habit_slug=habit.slug %}">
+        {% csrf_token %}
+        {% if habit.is_active %}
+            <button type="submit">Деактивировать привычку</button>
+        {% else %}
+            <button type="submit">Активировать привычку</button>
+        {% endif %}
+    </form>
+    <a href="{% url 'main:habit_update' habit_slug=habit.slug %}">Редактировать привычку</a>
+    <form action="{% url 'main:habit_delete' habit_slug=habit.slug %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Удалить привычку</button>
+    </form>
+
+{% endblock %}

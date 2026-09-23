@@ -1,0 +1,17 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Вход{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <h1>🔐 Вход</h1>
+
+    <form method="post" class="auth-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="auth-btn submit">Войти</button>
+    </form>
+
+    <p class="auth-link">Нет аккаунта? <a href="{% url 'main:register' %}">Зарегистрироваться</a></p>
+</div>
+{% endblock %}

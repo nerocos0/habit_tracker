@@ -1,0 +1,6 @@
+.env
+__init__.py
+migrations/
+media/
+venv/
+__pycache__
