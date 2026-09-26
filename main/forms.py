@@ -51,6 +51,8 @@ class HabitLogForm(forms.ModelForm):
     def clean_datetime(self):
         time = self.cleaned_data.get('datetime')
         date_today = timezone.localdate()
-        return timezone.make_aware(
+        datetime = timezone.make_aware(
             timezone.datetime.combine(date_today, time)
         )
+        
+        return datetime

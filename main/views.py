@@ -30,8 +30,44 @@ class HabitListView(LoginRequiredMixin, ListView):
                 output_field=BooleanField()
             )
         )
+
+        query = self.request.GET.get('q', '')
+        if query:
+            queryset = queryset.filter(Q(title__icontains=query))
+
+        filter_param = self.request.GET.get('filter', '')
+        if filter_param == 'active':
+            queryset = queryset.filter(is_active=True)
+        if filter_param == 'inactive':
+            queryset = queryset.filter(is_active=False)
+        if filter_param == 'done':
+            queryset = queryset.filter(is_done=True)
+        if filter_param == 'not_done':
+            queryset = queryset.filter(is_done=False)
+
+        sort_options = {
+            'title': 'title',
+            '-title': '-title',
+            'new': '-created_at',
+            'old': 'created_at',
+            'active': '-is_active',
+            'inactive': 'is_active',
+            'done': '-is_done',
+            'not_done': 'is_done',
+        }
+        sort_param = self.request.GET.get('sort', '')
+        order_by = sort_options.get(sort_param, 'title')
+        queryset = queryset.order_by(order_by)
+
         
         return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['query'] = self.request.GET.get('q', '')
+        context['filter'] = self.request.GET.get('filter', '')
+        context['sort'] = self.request.GET.get('sort', '')
+        return context
 
 
 class HabitDetailView(LoginRequiredMixin, DetailView):

@@ -4,3 +4,5 @@ migrations/
 media/
 venv/
 __pycache__
+postman
+.postman

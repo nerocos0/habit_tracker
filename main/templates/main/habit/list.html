@@ -3,6 +3,43 @@
 {% block title %}Список привычек{% endblock %}
 
 {% block content %}
+    <div class="filter-section">
+        <form method="get" class="filter-form">
+            <div class="search-group">
+                <input type="text" name="q" placeholder="🔍 Найти привычку..." value="{{ query }}" class="search-input">
+                <button type="submit" class="search-btn">Найти</button>
+            </div>
+
+            <div class="filter-group">
+                <select name="filter" id="" onchange="this.form.submit()">
+                    <option value="">Все привычки</option>
+                    <option value="active" {% if filter == 'active' %}selected{% endif %}>Активные</option>
+                    <option value="inactive" {% if filter == 'inactive' %}selected{% endif %}>Неактивные</option>
+                    <option value="done" {% if filter == 'done' %}selected{% endif %}>Выполненные</option>
+                    <option value="not_done" {% if filter == 'not_done' %}selected{% endif %}>Не выполненные</option>
+                </select>
+
+                <select name="sort" class="filter-select" onchange="this.form.submit()">
+                    <option value="title" {% if sort == 'title' %}selected{% endif %}>По названию (А→Я)</option>
+                    <option value="-title" {% if sort == '-title' %}selected{% endif %}>По названию (Я→А)</option>
+                    <option value="new" {% if sort == 'new' %}selected{% endif %}>Сначала новые</option>
+                    <option value="old" {% if sort == 'old' %}selected{% endif %}>Сначала старые</option>
+                    <option value="done" {% if sort == 'done' %}selected{% endif %}>Сначала выполненные</option>
+                    <option value="not_done" {% if sort == 'not_done' %}selected{% endif %}>Сначала не выполненные</option>
+                    <option value="active" {% if sort == 'active' %}selected{% endif %}>Сначала активные</option>
+                    <option value="inactive" {% if sort == 'inactive' %}selected{% endif %}>Сначала неактивные</option>
+                </select>
+            </div>
+        </form>
+
+        {% if query %}
+            <div class="search-results">
+                Найдено: <span>{{ habits|length }}</span> привычек по запросу "{{ query }}"
+                <a href="{% url 'main:habit_list' %}" class="clear-search">✕ Сбросить</a>
+            </div>
+        {% endif %}
+    </div>
+
     {% for habit in habits %}
         {{habit}}
         {% if habit.is_done %}
