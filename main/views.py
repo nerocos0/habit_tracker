@@ -147,7 +147,7 @@ class HabitDeleteView(LoginRequiredMixin, DeleteView):
 @login_required
 @require_POST
 def habit_reverse_is_active(request, habit_slug):
-    habit = get_object_or_404(Habit, slug=habit_slug)
+    habit = get_object_or_404(Habit, slug=habit_slug, user=request.user)
     habit.is_active = not habit.is_active
     habit.save(update_fields=['is_active'])
     return redirect('main:habit_detail', habit_slug=habit_slug)
@@ -183,7 +183,9 @@ class HabitLogDeleteView(LoginRequiredMixin, DeleteView):
         return get_object_or_404(
             HabitLog,
             pk=self.kwargs.get('log_id'),
-            habit__slug=self.kwargs.get('habit_slug'))
+            habit__slug=self.kwargs.get('habit_slug'),
+            habit__user=self.request.user
+        )
 
     def delete(self, request, *args, **kwargs):
         messages.success(request, f'Отметка привычки "{self.object.habit.title}" удалена.')

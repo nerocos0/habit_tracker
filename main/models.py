@@ -27,7 +27,8 @@ class Habit(models.Model):
     def save(self, *args, **kwargs):
         if (not self.slug) or (not slugify(unidecode(self.title)) == self.slug):
             transliterated_title = unidecode(self.title)
-            self.slug = slugify(transliterated_title)
+            slug = f'{transliterated_title}-{self.user_id}'
+            self.slug = slugify(slug)
         super().save(*args, **kwargs)
 
 class HabitLog(models.Model):

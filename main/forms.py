@@ -1,5 +1,6 @@
 from django import forms
 from django.utils import timezone
+from datetime import datetime
 from .models import Habit, HabitLog
 
 class HabitForm(forms.ModelForm):
@@ -51,8 +52,8 @@ class HabitLogForm(forms.ModelForm):
     def clean_datetime(self):
         time = self.cleaned_data.get('datetime')
         date_today = timezone.localdate()
-        datetime = timezone.make_aware(
-            timezone.datetime.combine(date_today, time)
+        dt = timezone.make_aware(
+            datetime.combine(date_today, time)
         )
         
-        return datetime
+        return dt

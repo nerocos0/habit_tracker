@@ -1,5 +1,5 @@
 from django.utils import timezone
-from datetime import time
+from datetime import datetime
 
 from rest_framework import serializers
 from ..models import Habit, HabitLog
@@ -31,7 +31,7 @@ class HabitLogSerializer(serializers.ModelSerializer):
         time = validated_data.pop('time_input')
         date = timezone.localdate()
         dt = timezone.make_aware(
-            timezone.datetime.combine(date, time)
+            datetime.combine(date, time)
         )
         return HabitLog.objects.create(datetime=dt, **validated_data)
 

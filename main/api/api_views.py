@@ -7,7 +7,7 @@ from django.db.models import Q, F, Count, When, Case, Value, BooleanField
 from django.shortcuts import get_object_or_404
 
 from .serializers import HabitSerializer, HabitLogSerializer
-from .permissions import IsOwnerOrAdminOrReadOnly
+from .permissions import IsAuthenticated, IsHabitOwnerOrStaff, IsHabitLogOwnerOrStaff
 from ..models import Habit, HabitLog
 from .filters import HabitFilter
 
@@ -16,7 +16,7 @@ class HabitViewSet(viewsets.ModelViewSet):
     serializer_class = HabitSerializer
     lookup_field = 'slug'
     lookup_url_kwarg = 'slug'
-    permission_classes = [IsOwnerOrAdminOrReadOnly]
+    permission_classes = [IsAuthenticated, IsHabitOwnerOrStaff]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = HabitFilter
     search_fields = ['title']
@@ -40,7 +40,7 @@ class HabitViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['POST'], serializer_class=serializers.Serializer)
     def reverse_active(self, request, slug=None):
-        habit = get_object_or_404(Habit, slug=slug)
+        habit = get_object_or_404(Habit, slug=slug, user=request.user)
         habit.is_active = not habit.is_active
         habit.save(update_fields=['is_active'])
         if habit.is_active:
@@ -51,7 +51,8 @@ class HabitViewSet(viewsets.ModelViewSet):
 
 class HabitLogViewSet(viewsets.ModelViewSet):
     serializer_class = HabitLogSerializer
-    permission_classes = [IsOwnerOrAdminOrReadOnly]
+    permission_classes = [IsAuthenticated, IsHabitLogOwnerOrStaff]
+    # Логи нельзя редактировать — только создавать и удалять
     http_method_names = ['get', 'post', 'delete', 'head', 'options']
 
     def get_queryset(self):
