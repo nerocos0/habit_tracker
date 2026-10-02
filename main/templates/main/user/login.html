@@ -1,17 +1,32 @@
 {% extends 'main/base.html' %}
-
 {% block title %}Вход{% endblock %}
 
 {% block content %}
-<div class="auth-container">
-    <h1>🔐 Вход</h1>
+<div class="auth-wrap">
+    <h1 class="auth-title">Вход</h1>
+    <p class="auth-subtitle">Рады видеть снова</p>
 
-    <form method="post" class="auth-form">
+    <form method="post" class="form">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="auth-btn submit">Войти</button>
+
+        {% if form.non_field_errors %}
+            <div class="form-alert">
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% for field in form %}
+            <div class="field">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}<div class="field-error">{{ field.errors }}</div>{% endif %}
+            </div>
+        {% endfor %}
+        <button type="submit" class="btn-primary btn-block">Войти</button>
     </form>
 
-    <p class="auth-link">Нет аккаунта? <a href="{% url 'main:register' %}">Зарегистрироваться</a></p>
+    <p class="auth-foot">Нет аккаунта? <a href="{% url 'main:register' %}">Зарегистрироваться</a></p>
 </div>
 {% endblock %}

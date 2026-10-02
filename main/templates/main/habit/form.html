@@ -1,15 +1,33 @@
 {% extends 'main/base.html' %}
-
 {% block title %}{{ title }}{% endblock %}
 
-
 {% block content %}
+<div class="form-wrap">
+    <a href="{% url 'main:habit_list' %}" class="back-link">Назад</a>
 
-    <h1>{{ title }}</h1>
-    <form method="post">
+    <h1 class="page-title">{{ title }}</h1>
+
+    <form method="post" class="form">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">{{ button_text }}</button>
+
+        {% for field in form %}
+            <div class="field">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                    <div class="field-error">{{ field.errors }}</div>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <button type="submit" class="btn-primary btn-block">{{ button_text }}</button>
     </form>
+</div>
+
+{% if form.non_field_errors %}
+    <div class="form-alert">
+        {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+    </div>
+{% endif %}
 
 {% endblock %}

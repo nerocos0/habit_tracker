@@ -6,6 +6,7 @@ from django.shortcuts import redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
 from django.views.decorators.http import require_POST
 from django.urls import reverse_lazy, reverse
+from django.db import IntegrityError
 from django.contrib import messages
 from django.utils import timezone
 
@@ -98,10 +99,19 @@ class HabitCreateView(LoginRequiredMixin, CreateView):
     template_name = 'main/habit/form.html'
     success_url = reverse_lazy('main:habit_list')
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
     def form_valid(self, form):
         form.instance.user = self.request.user
-        return super().form_valid(form)
-
+        try:
+            return super().form_valid(form)
+        except IntegrityError:
+            form.add_error('title', 'У вас уже есть привычка с таким названием')
+            return self.form_invalid(form)
+        
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Создание привычки'
@@ -118,6 +128,12 @@ class HabitUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_queryset(self):
         return Habit.objects.filter(user=self.request.user)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
 
     def get_success_url(self):
         return reverse_lazy('main:habit_detail', kwargs={'habit_slug': self.object.slug})

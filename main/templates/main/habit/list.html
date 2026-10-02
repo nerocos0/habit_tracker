@@ -1,58 +1,79 @@
 {% extends 'main/base.html' %}
-
-{% block title %}Список привычек{% endblock %}
+{% block title %}Мои привычки{% endblock %}
 
 {% block content %}
-    <div class="filter-section">
-        <form method="get" class="filter-form">
-            <div class="search-group">
-                <input type="text" name="q" placeholder="🔍 Найти привычку..." value="{{ query }}" class="search-input">
-                <button type="submit" class="search-btn">Найти</button>
-            </div>
+<div class="page-head">
+    <div>
+        <h1 class="page-title">Мои привычки</h1>
+        <p class="page-subtitle">Отслеживай прогресс каждый день</p>
+    </div>
+    <a href="{% url 'main:habit_create' %}" class="btn-primary">Добавить привычку</a>
+</div>
 
-            <div class="filter-group">
-                <select name="filter" id="" onchange="this.form.submit()">
-                    <option value="">Все привычки</option>
-                    <option value="active" {% if filter == 'active' %}selected{% endif %}>Активные</option>
-                    <option value="inactive" {% if filter == 'inactive' %}selected{% endif %}>Неактивные</option>
-                    <option value="done" {% if filter == 'done' %}selected{% endif %}>Выполненные</option>
-                    <option value="not_done" {% if filter == 'not_done' %}selected{% endif %}>Не выполненные</option>
-                </select>
-
-                <select name="sort" class="filter-select" onchange="this.form.submit()">
-                    <option value="title" {% if sort == 'title' %}selected{% endif %}>По названию (А→Я)</option>
-                    <option value="-title" {% if sort == '-title' %}selected{% endif %}>По названию (Я→А)</option>
-                    <option value="new" {% if sort == 'new' %}selected{% endif %}>Сначала новые</option>
-                    <option value="old" {% if sort == 'old' %}selected{% endif %}>Сначала старые</option>
-                    <option value="done" {% if sort == 'done' %}selected{% endif %}>Сначала выполненные</option>
-                    <option value="not_done" {% if sort == 'not_done' %}selected{% endif %}>Сначала не выполненные</option>
-                    <option value="active" {% if sort == 'active' %}selected{% endif %}>Сначала активные</option>
-                    <option value="inactive" {% if sort == 'inactive' %}selected{% endif %}>Сначала неактивные</option>
-                </select>
-            </div>
-        </form>
-
-        {% if query %}
-            <div class="search-results">
-                Найдено: <span>{{ habits|length }}</span> привычек по запросу "{{ query }}"
-                <a href="{% url 'main:habit_list' %}" class="clear-search">✕ Сбросить</a>
-            </div>
-        {% endif %}
+<form method="get" class="toolbar">
+    <div class="search-field">
+        <span class="search-icon">⌕</span>
+        <input type="text" name="q" placeholder="Поиск привычки..." value="{{ query }}" class="input">
     </div>
 
-    {% for habit in habits %}
-        {{habit}}
-        {% if habit.is_done %}
-            <span>✅</span>
-        {% else %}
-            <span>❌</span>
-            <p>Выполнено {{ habit.count_done }} из {{ habit.target }}</p>
-        {% endif %}
-        <a href="{% url 'main:habit_detail' habit_slug=habit.slug %}">Детально</a>
-        {% if habit.is_active %}
-            <span>Активна</span>
-        {% else %}
-            <span>Неактивна</span>
-        {% endif %}
-    {% endfor %}
+    <select name="filter" class="select" onchange="this.form.submit()">
+        <option value="">Все привычки</option>
+        <option value="active" {% if filter == 'active' %}selected{% endif %}>Активные</option>
+        <option value="inactive" {% if filter == 'inactive' %}selected{% endif %}>Неактивные</option>
+        <option value="done" {% if filter == 'done' %}selected{% endif %}>Выполненные</option>
+        <option value="not_done" {% if filter == 'not_done' %}selected{% endif %}>Не выполненные</option>
+    </select>
+
+    <select name="sort" class="select" onchange="this.form.submit()">
+        <option value="title" {% if sort == 'title' %}selected{% endif %}>По названию (А→Я)</option>
+        <option value="-title" {% if sort == '-title' %}selected{% endif %}>По названию (Я→А)</option>
+        <option value="new" {% if sort == 'new' %}selected{% endif %}>Сначала новые</option>
+        <option value="old" {% if sort == 'old' %}selected{% endif %}>Сначала старые</option>
+        <option value="done" {% if sort == 'done' %}selected{% endif %}>Сначала выполненные</option>
+        <option value="not_done" {% if sort == 'not_done' %}selected{% endif %}>Сначала не выполненные</option>
+    </select>
+</form>
+
+{% if query %}
+    <div class="search-note">
+        Найдено <b>{{ habits|length }}</b> привычек по запросу «{{ query }}»
+        <a href="{% url 'main:habit_list' %}" class="link-reset">Сбросить</a>
+    </div>
+{% endif %}
+
+{% if habits %}
+    <div class="grid">
+        {% for habit in habits %}
+            <a href="{% url 'main:habit_detail' habit_slug=habit.slug %}" class="card {% if habit.is_done %}card-done{% endif %} {% if not habit.is_active %}card-inactive{% endif %}">
+                <div class="card-top">
+                    <span class="card-status {% if habit.is_done %}status-done{% else %}status-pending{% endif %}">
+                        {% if habit.is_done %}✓{% else %}○{% endif %}
+                    </span>
+                    {% if not habit.is_active %}
+                        <span class="chip chip-muted">пауза</span>
+                    {% endif %}
+                </div>
+
+                <h3 class="card-title">{{ habit.title }}</h3>
+
+                {% if habit.description %}
+                    <p class="card-desc">{{ habit.description|truncatechars:70 }}</p>
+                {% endif %}
+
+                <div class="card-foot">
+                    <div class="progress">
+                        <div class="progress-bar" style="width: {% widthratio habit.count_done habit.target 100 %}%"></div>
+                    </div>
+                    <span class="progress-label">{{ habit.count_done }} / {{ habit.target }}</span>
+                </div>
+            </a>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty">
+        <div class="empty-icon">◇</div>
+        <p>Пока нет привычек</p>
+        <a href="{% url 'main:habit_create' %}" class="btn-primary">Создать первую</a>
+    </div>
+{% endif %}
 {% endblock %}

@@ -2,6 +2,8 @@ from django import forms
 from django.utils import timezone
 from datetime import datetime
 from .models import Habit, HabitLog
+from django.utils.text import slugify
+from unidecode import unidecode
 
 class HabitForm(forms.ModelForm):
     class Meta:
@@ -29,6 +31,28 @@ class HabitForm(forms.ModelForm):
             'description': 'Описание привычки',
             'target': 'Сколько выполнить в день',
         }
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user')
+        super().__init__(*args, **kwargs)
+
+    def clean_title(self):
+        title = self.cleaned_data.get('title')
+        if not title or not self.user:
+            return title
+        
+        slug = slugify(f'{unidecode(title)}-{self.user.id}')
+        if not slug:
+            return title
+        
+        habit_in_db = Habit.objects.filter(user=self.user, slug=slug)
+        if self.instance.pk:
+            habit_in_db = habit_in_db.exclude(pk=self.instance.pk)
+        
+        if habit_in_db.exists():
+            raise forms.ValidationError('У вас уже есть привычка с таким названием')
+        
+        return title
 
     def clean_target(self):
         target = self.cleaned_data.get('target')

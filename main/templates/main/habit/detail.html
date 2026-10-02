@@ -1,42 +1,86 @@
 {% extends 'main/base.html' %}
-{% block title %}{{ habit }}{% endblock %}
+{% block title %}{{ habit.title }}{% endblock %}
 
 {% block content %}
+<a href="{% url 'main:habit_list' %}" class="back-link">← Назад к списку</a>
 
-    <h1>{{ habit }}</h1>
-    <p>{{ habit.description }}</p>
+<div class="detail">
+    <div class="detail-head">
+        <div>
+            <h1 class="page-title">{{ habit.title }}</h1>
+            {% if habit.description %}
+                <p class="page-subtitle">{{ habit.description }}</p>
+            {% endif %}
+        </div>
+        <span class="chip {% if habit.is_active %}chip-ok{% else %}chip-muted{% endif %}">
+            {% if habit.is_active %}Активна{% else %}На паузе{% endif %}
+        </span>
+    </div>
+
+    <div class="detail-stats">
+        <div class="stat">
+            <span class="stat-value">{{ today_logs|length }}</span>
+            <span class="stat-label">сегодня</span>
+        </div>
+        <div class="stat">
+            <span class="stat-value">{{ habit.target }}</span>
+            <span class="stat-label">цель в день</span>
+        </div>
+        <div class="stat">
+            <span class="stat-value">{% if is_done %}✓{% else %}—{% endif %}</span>
+            <span class="stat-label">статус</span>
+        </div>
+    </div>
 
     {% if not is_done %}
-        <p>План на сегодня не выполнен</p>
-        <form method="post" action="{% url 'main:habit_log_create' habit_slug=habit.slug %}">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit">Отметить</button>
-        </form>
-    {% else %}
-        <p>План на сегодня выполнен</p>
-    {% endif %}
-    <ul>
-        {% for log in today_logs %}
-            <li>✅ Выполнено в {{ log.datetime|time:'H:i' }}</li>
-            <form method="post" action="{% url 'main:habit_log_delete' habit_slug=habit.slug log_id=log.id %}">
+        <div class="panel panel-accent">
+            <h2 class="panel-title">Отметить выполнение</h2>
+            <form method="post" action="{% url 'main:habit_log_create' habit_slug=habit.slug %}" class="inline-form-row">
                 {% csrf_token %}
-                <button type="submit">Удалить</button>
+                <div class="field">
+                    <label for="{{ form.datetime.id_for_label }}">{{ form.datetime.label }}</label>
+                    {{ form.datetime }}
+                </div>
+                <button type="submit" class="btn-primary">Отметить</button>
             </form>
-        {% endfor %}
-    </ul>
-    <form method="post" action="{% url 'main:habit_reverse' habit_slug=habit.slug %}">
-        {% csrf_token %}
-        {% if habit.is_active %}
-            <button type="submit">Деактивировать привычку</button>
-        {% else %}
-            <button type="submit">Активировать привычку</button>
-        {% endif %}
-    </form>
-    <a href="{% url 'main:habit_update' habit_slug=habit.slug %}">Редактировать привычку</a>
-    <form action="{% url 'main:habit_delete' habit_slug=habit.slug %}" method="post">
-        {% csrf_token %}
-        <button type="submit">Удалить привычку</button>
-    </form>
+        </div>
+    {% else %}
+        <div class="panel panel-success">
+            <span class="panel-icon">✓</span>
+            <p>Цель на сегодня выполнена</p>
+        </div>
+    {% endif %}
 
+    {% if today_logs %}
+        <h2 class="section-title">Отметки за сегодня</h2>
+        <ul class="log-list">
+            {% for log in today_logs %}
+                <li class="log-item">
+                    <span class="log-time">{{ log.datetime|time:'H:i' }}</span>
+                    <span class="log-dot"></span>
+                    <form method="post" action="{% url 'main:habit_log_delete' habit_slug=habit.slug log_id=log.id %}" class="inline-form">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-icon-danger" title="Удалить">✕</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <div class="detail-actions">
+        <a href="{% url 'main:habit_update' habit_slug=habit.slug %}" class="btn-secondary">Редактировать</a>
+
+        <form method="post" action="{% url 'main:habit_reverse' habit_slug=habit.slug %}" class="inline-form">
+            {% csrf_token %}
+            <button type="submit" class="btn-secondary">
+                {% if habit.is_active %}Поставить на паузу{% else %}Возобновить{% endif %}
+            </button>
+        </form>
+
+        <form method="post" action="{% url 'main:habit_delete' habit_slug=habit.slug %}" class="inline-form" onsubmit="return confirm('Удалить привычку?')">
+            {% csrf_token %}
+            <button type="submit" class="btn-danger">Удалить</button>
+        </form>
+    </div>
+</div>
 {% endblock %}

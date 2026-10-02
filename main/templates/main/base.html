@@ -1,49 +1,46 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Habit Tracker{% endblock %}</title>
-    <link rel="stylesheet" type="text/css" href="{% static 'main/css/styles.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'main/css/styles.css' %}">
 </head>
 <body>
 
 <header class="header">
-    <div class="header-content">
-        <div class="logo-container">
-            {% if user.is_authenticated %}
-                <a href="{% url 'main:habit_list' %}">
-                    <img src="{% static 'main/images/logo.png' %}" alt="Logo" class="logo">
-                </a>
-            {% else %}
-                <img src="{% static 'main/images/logo.png' %}" alt="Logo" class="logo logo-static">
-            {% endif %}
-        </div>
+    <div class="header-inner">
+        <a href="{% url 'main:habit_list' %}" class="brand">
+            <span class="brand-mark">◆</span>
+            <span class="brand-text">Habit<span class="brand-accent">Tracker</span></span>
+        </a>
 
-        <div class="header-actions">
+        <nav class="header-nav">
             {% if user.is_authenticated %}
-                <a href="{% url 'main:habit_create' %}" class="header-btn primary">Добавить привычку</a>
-                <form method="post" action="{% url 'main:logout' %}" style="display: inline;">
+                <div class="user-chip">
+                    <span class="user-dot"></span>
+                    <span class="user-name">{{ user.username }}</span>
+                </div>
+                <form method="post" action="{% url 'main:logout' %}" class="inline-form">
                     {% csrf_token %}
-                    <button type="submit" class="logout-btn">Выйти</button>
+                    <button type="submit" class="btn-ghost">Выйти</button>
                 </form>
             {% else %}
-                <a href="{% url 'main:login' %}" class="auth-btn">Войти</a>
-                <a href="{% url 'main:register' %}" class="auth-btn">Регистрация</a>
+                <a href="{% url 'main:login' %}" class="nav-link">Войти</a>
+                <a href="{% url 'main:register' %}" class="nav-link nav-link-accent">Регистрация</a>
             {% endif %}
-        </div>
+        </nav>
     </div>
 </header>
 
-<main class="container">
+<main class="page">
     {% if messages %}
-        <div class="messages">
+        <div class="toast-stack">
             {% for message in messages %}
-                <div class="message {{ message.tags }}">
-                    {{ message }}
-                </div>
+                <div class="toast toast-{{ message.tags }}">{{ message }}</div>
             {% endfor %}
         </div>
     {% endif %}
@@ -51,8 +48,8 @@
     {% block content %}{% endblock %}
 </main>
 
-<footer>
-    <p>© 2026 Habit Tracker. Все права защищены.</p>
+<footer class="footer">
+    <p>© 2026 Habit Tracker</p>
 </footer>
 
 {% block extra_js %}{% endblock %}
