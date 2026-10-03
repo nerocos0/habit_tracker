@@ -1,5 +1,6 @@
-venv/
 .env
+venv/
+.venv/
 __pycache__/
 *.pyc
 *.pyo
@@ -8,3 +9,6 @@ __pycache__/
 .gitignore
 staticfiles/
 .pytest_cache/
+.idea/
+.vscode/
+media/
