@@ -35,7 +35,7 @@ class HabitLogSerializer(serializers.ModelSerializer):
         )
         return HabitLog.objects.create(datetime=dt, **validated_data)
 
-    def get_time_output(self, obj):
+    def get_time_output(self, obj) -> str | None:
         if obj.datetime:
             time = timezone.localtime(obj.datetime)
             return time.strftime('%H:%M')

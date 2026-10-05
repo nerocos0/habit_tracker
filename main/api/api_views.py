@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q, F, Count, When, Case, Value, BooleanField
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import extend_schema, OpenApiResponse
 
 from .serializers import HabitSerializer, HabitLogSerializer
 from .permissions import IsAuthenticated, IsHabitOwnerOrStaff, IsHabitLogOwnerOrStaff
@@ -24,6 +25,9 @@ class HabitViewSet(viewsets.ModelViewSet):
     ordering = ['title']
 
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False) or self.request.user.is_anonymous:
+            return Habit.objects.none()
+        
         queryset = Habit.objects.filter(user=self.request.user).annotate(
             count_done=Count('habit_logs', filter=Q(habit_logs__datetime__date=timezone.localdate()))
         ).annotate(
@@ -38,6 +42,10 @@ class HabitViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+    @extend_schema(
+        request=None,
+        responses={200: OpenApiResponse(description='Статус изменён')},
+    )
     @action(detail=True, methods=['POST'], serializer_class=serializers.Serializer)
     def reverse_active(self, request, slug=None):
         habit = get_object_or_404(Habit, slug=slug, user=request.user)
@@ -56,6 +64,9 @@ class HabitLogViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'delete', 'head', 'options']
 
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False) or self.request.user.is_anonymous:
+            return HabitLog.objects.none()
+        
         habit_slug = self.kwargs.get('habit_slug')
         return HabitLog.objects.filter(
             habit__user=self.request.user,
