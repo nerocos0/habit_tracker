@@ -25,6 +25,8 @@ services:
       - static_volume:/app/staticfiles    # статика
     env_file:
       - .env                              #переменные окружения
+    environment:
+      DJANGO_SETTINGS_MODULE: habit_tracker.settings.prod
     depends_on:
       db:
         condition: service_healthy                               # запускать после db
