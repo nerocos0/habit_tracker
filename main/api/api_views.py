@@ -5,7 +5,13 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q, F, Count, When, Case, Value, BooleanField
 from django.shortcuts import get_object_or_404
-from drf_spectacular.utils import extend_schema, OpenApiResponse
+from drf_spectacular.utils import (
+    extend_schema,
+    extend_schema_view,
+    OpenApiResponse,
+    OpenApiParameter,
+)
+from drf_spectacular.types import OpenApiTypes
 
 from .serializers import HabitSerializer, HabitLogSerializer
 from .permissions import IsAuthenticated, IsHabitOwnerOrStaff, IsHabitLogOwnerOrStaff
@@ -56,7 +62,30 @@ class HabitViewSet(viewsets.ModelViewSet):
         else:
             return Response({'status': 'Привычка приостановлена'}, status=status.HTTP_200_OK)
 
-
+@extend_schema_view(
+    list=extend_schema(
+        parameters=[
+            OpenApiParameter('habit_slug', OpenApiTypes.STR, OpenApiParameter.PATH),
+        ],
+    ),
+    create=extend_schema(
+        parameters=[
+            OpenApiParameter('habit_slug', OpenApiTypes.STR, OpenApiParameter.PATH),
+        ],
+    ),
+    retrieve=extend_schema(
+        parameters=[
+            OpenApiParameter('habit_slug', OpenApiTypes.STR, OpenApiParameter.PATH),
+            OpenApiParameter('id', OpenApiTypes.INT, OpenApiParameter.PATH),
+        ],
+    ),
+    destroy=extend_schema(
+        parameters=[
+            OpenApiParameter('habit_slug', OpenApiTypes.STR, OpenApiParameter.PATH),
+            OpenApiParameter('id', OpenApiTypes.INT, OpenApiParameter.PATH),
+        ],
+    ),
+)
 class HabitLogViewSet(viewsets.ModelViewSet):
     serializer_class = HabitLogSerializer
     permission_classes = [IsAuthenticated, IsHabitLogOwnerOrStaff]
