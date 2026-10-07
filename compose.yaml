@@ -19,7 +19,7 @@ services:
 
   # Контейнер 2: Django + Gunicorn
   web:
-    build: .                              #собрать из Dockerfile
+    image: ghcr.io/nerocos0/habit_tracker:latest                          #забрать образ из GHCR (CD)
     command: gunicorn habit_tracker.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - static_volume:/app/staticfiles    # статика
